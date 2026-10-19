@@ -13,10 +13,14 @@ public class Cuenta {
         this.tasaAnual = tasaAnual;
     }
 
-    public void consignar(float cantidad) {
+    protected void validarCantidadConsignacion(float cantidad) {
         if (cantidad < 0) {
             throw new IllegalArgumentException("La cantidad a consignar no puede ser negativa");
         }
+    }
+
+    public void consignar(float cantidad) {
+        validarCantidadConsignacion(cantidad);
         saldo += cantidad;
         numeroConsignaciones++;
     }

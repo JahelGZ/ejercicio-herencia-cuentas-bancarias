@@ -4,9 +4,9 @@ public class CuentaAhorros extends Cuenta {
 
     protected boolean activa = false;
 
-    final float SALDO_MINIMO = 10000f;
-    final float COMISION_RETIRO = 1000f;
-    final int NUMERO_RETIROS_SIN_COMISION = 4;
+    private static final float SALDO_MINIMO = 10_000f;
+    private static final float COMISION_RETIRO = 1_000f;
+    private static final int NUMERO_RETIROS_SIN_COMISION = 4;
 
     CuentaAhorros(float saldo, float tasaAnual) {
         super(saldo, tasaAnual);
@@ -14,20 +14,18 @@ public class CuentaAhorros extends Cuenta {
     }
 
     public boolean cuentaActivaSaldoMinimo() {
-        if (saldo >= SALDO_MINIMO) {
-            activa = true;
-        } else {
-            activa = false;
-        } 
+        activa = saldo >= SALDO_MINIMO;
         return activa;
     }
 
     @Override
     public void consignar(float cantidad) {
-        if (activa) {
-            super.consignar(cantidad);
-            cuentaActivaSaldoMinimo();
+        validarCantidadConsignacion(cantidad);
+        if (!activa) {
+            return;
         }
+        super.consignar(cantidad);
+        cuentaActivaSaldoMinimo();
     }
 
     @Override
@@ -40,11 +38,14 @@ public class CuentaAhorros extends Cuenta {
 
     @Override
     public void extractoMensual() {
-        if (numeroRetiros > NUMERO_RETIROS_SIN_COMISION) {
-            int retirosExcedentes = numeroRetiros - NUMERO_RETIROS_SIN_COMISION;
-            comisionMensual += retirosExcedentes * COMISION_RETIRO;
-            cuentaActivaSaldoMinimo();
+        if (!activa) {
+            return;
         }
+
+        int retirosExcedentes = Math.max(0, numeroRetiros - NUMERO_RETIROS_SIN_COMISION);
+        comisionMensual = retirosExcedentes * COMISION_RETIRO;
+        super.extractoMensual();
+        cuentaActivaSaldoMinimo();
     }
 
     @Override
